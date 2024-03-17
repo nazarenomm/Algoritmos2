@@ -48,10 +48,11 @@ def cociente(x: int, y: int) -> int:
 def resto(x: int, y: int) -> int:
     return x - cociente(x,y) * y
 
-print("sumatoria(5): ", sumatoria(5))
-print("factorial(4): ", factorial(4))
-print("fibonacci(7): ", fibonacci(7))
-print("producto(4,3):", producto(4,3))
-print("potencia(2,3):", potencia(2,3))
-print("8 // 4 = ", cociente(8,4))
-print("resto:", resto(8,4))
+if __name__ == "__main__":
+    print("sumatoria(5): ", sumatoria(5))
+    print("factorial(4): ", factorial(4))
+    print("fibonacci(7): ", fibonacci(7))
+    print("producto(4,3):", producto(4,3))
+    print("potencia(2,3):", potencia(2,3))
+    print("8 // 4 = ", cociente(8,4))
+    print("resto:", resto(8,4))
