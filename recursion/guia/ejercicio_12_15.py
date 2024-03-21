@@ -24,7 +24,8 @@ def taylor(x:float, tol: float, n:int = 0) -> float:
     else:
         return termino + taylor(x, tol, n+1)
 
-#print(taylor(1, 0.05))
+import math
+print(taylor(math.pi / 4, 0.05))
     
 def pares(n:int, x:int = 1, lista_pares:list[tuple[int, int]] = []) -> None:
     if n < 2:
