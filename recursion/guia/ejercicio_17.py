@@ -37,6 +37,7 @@ def sierpinsky(x, y, b, n):
 #sierpinsky(-250,0,500,4)
 
 def curvas(longitud, n:int):
+    turtle.speed(0)
     if n == 0:
         turtle.forward(longitud)
     else:
@@ -49,4 +50,9 @@ def curvas(longitud, n:int):
         turtle.left(60)
         curvas(longitud, n-1)
 
-curvas(200,3)
+def copos(longitud: int, n: int) -> None:
+    for _ in range(3):
+        curvas(longitud, n)
+        turtle.right(120)
+
+#copos(300,3)
