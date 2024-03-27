@@ -17,6 +17,9 @@ class Nodo(Generic[T]):
     
     def __repr__(self) -> str:
         return f"Nodo({str(self.dato)})"
+    
+    def __eq__(self, otro):
+        return self.dato == otro.dato
 
 class Lista(Generic[T]):
     def __init__(self):
@@ -64,6 +67,12 @@ class Lista(Generic[T]):
         actual = copy(self)
         self._head = Nodo(dato, actual)
 
+    def insertar_ultimo(self, dato: T):
+        if self.es_vacia():
+            self._head = Nodo(dato, Lista())
+        else:
+            self._head.sig.insertar_ultimo(dato)
+
     def eliminar(self, valor: T):
         def _eliminar_interna(actual: ListaGenerica, previo: ListaGenerica, valor: T):
             if not actual.es_vacia():
@@ -79,19 +88,43 @@ class Lista(Generic[T]):
                 _eliminar_interna(self._head.sig, self, valor)
 
     def ultimo(self) -> T:
-        pass
+        if len(self) == 1:
+            return self.head()
+        else:
+            return self._head.sig.ultimo()
 
     def concat(self, ys: ListaGenerica) -> ListaGenerica:
-        pass
+        concatenada = self.copy()
+        if ys.es_vacia():
+            return concatenada
+        else:
+            concatenada.insertar_ultimo(ys._head)
+            return concatenada.concat(ys._head.sig)
         
     def join(self, separador: str = '') -> str:
-        pass
+        def join_interna(self, separador) -> str:
+            if self.es_vacia():
+                return ''
+            else:
+                return str(self._head) + separador + join_interna(self._head.sig, separador)
+        return join_interna(self, separador)[:-len(separador)]
         
-    def index(self, valor: T) -> int:
-        pass
-        
+    def index(self, valor: T) -> int | None:
+        def index_interna(self, valor, index = 0):
+            if self._head.dato == valor:
+                return index
+            else:
+                return index_interna(self._head.sig, valor, index + 1)
+        if self.existe(valor):
+            return index_interna(self, valor)
+        else:
+            return None
+            
     def existe(self, valor: T) -> bool:
-        pass
+        if self.es_vacia():
+            return False
+        else:
+            return self._head.dato == valor or self._head.sig.existe(valor)
 
     def __repr__(self) -> str:
         def interna(self):
@@ -104,11 +137,13 @@ class Lista(Generic[T]):
         else:
             return f"Lista({interna(self)[:-2]})"
 
-        
     def __eq__(self, otra: ListaGenerica) -> bool:
-        pass
-    # if len distintas return false
-    #ir comparando heads y disminuyendo las listas return head1 == head2 and recursion
+        if len(self) != len(otra):
+            return False
+        if len(self) == 1:
+            return self._head == otra._head
+        else:
+            return self._head == otra._head and self._head.sig == otra._head.sig
     
 
 if __name__ == '__main__':
@@ -128,5 +163,23 @@ if __name__ == '__main__':
     zs.eliminar(8)
     zs.eliminar(9)
     
-    print(xs)
+    print(f'xs: {xs}')
+    print(f'ys: {ys}')
+    print(f'zs: {zs}')
+
+    print(f'xs igual a xs?: {xs == xs}')
+    print(f'xs igual a ys?: {xs == ys}')
+
+    print(f'ultimo de xs: {xs.ultimo()}')
+    print(f'ultimo de xs: {ys.ultimo()}')
+
+    print(f'join de xs: {xs.join(" separador ")}')
+
+    print(f'4 en xs?: {xs.existe(4)}')
+    print(f'5 en xs?: {xs.existe(5)}')
+
+    print(f'index de 100 en xs: {xs.index(100)}')
+    print(f'index de 10 en xs: {xs.index(10)}')
+
+    print(f'xs e ys concatenadas: {xs.concat(ys)}')
     
