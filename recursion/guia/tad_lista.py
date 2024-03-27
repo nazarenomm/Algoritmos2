@@ -38,6 +38,21 @@ class Lista(Generic[T]):
             else:
                 return str(self._head) + ', ' + str_interna(self._head.sig)
         return '[' + str_interna(self)[:-2] + ']'
+    
+    def __getitem__(self, index: int) -> T:
+        if index >= len(self) or index < (-1*len(self)) :
+            raise IndexError()
+
+        if index == 0:
+            return self._head
+        elif index == -1:
+            return self.ultimo()
+        elif index > 0:
+            return self._head.sig[index - 1]
+        else:
+            copia_self = self.copy()
+            copia_self.eliminar(copia_self.ultimo())
+            return copia_self[index + 1]
 
     def es_vacia(self) -> bool:
         return self._head is None
@@ -182,4 +197,11 @@ if __name__ == '__main__':
     print(f'index de 10 en xs: {xs.index(10)}')
 
     print(f'xs e ys concatenadas: {xs.concat(ys)}')
+
+    print(f'xs[1]: {xs[1]}')
+    print(f'xs[-1]: {xs[-1]}')				
+
+    # Consumiendo como iterable
+    for x in xs:
+        print(x)	# 20 -> 10 -> 4
     
