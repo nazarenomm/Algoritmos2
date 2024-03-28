@@ -159,7 +159,14 @@ class Lista(Generic[T]):
             return self._head == otra._head
         else:
             return self._head == otra._head and self._head.sig == otra._head.sig
-    
+
+    def reversa(self) -> ListaGenerica:
+        if self.es_vacia():
+            return self
+        else:
+            nodo = Lista()
+            nodo.insertar(self._head)
+            return self._head.sig.reversa().concat(nodo)
 
 if __name__ == '__main__':
     xs: Lista[int] = Lista()
@@ -204,4 +211,6 @@ if __name__ == '__main__':
     # Consumiendo como iterable
     for x in xs:
         print(x)	# 20 -> 10 -> 4
+
+    print(f'reversa de xs: {xs.reversa()}')
     
