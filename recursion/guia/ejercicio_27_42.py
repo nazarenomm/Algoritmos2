@@ -82,10 +82,50 @@ def reversa(lista: list[int]) -> list[int]:
     else:
         return reversa(lista[1:]) + [lista[0]]
     
+def es_palindromo(lista :list[int])-> bool:
+    if len(lista) <= 1:
+        return True
+    else:
+        primero = posicion(lista,0)
+        ult = ultimo(lista)
+        return primero == ult and es_palindromo(lista[1:-1])
+    
+def cantidad(lista: list[int], n: int) -> int:
+    def cant_interna(lista: list[int], n: int, acc: int = 0) -> int:
+        if not pertenece(lista, n):
+            return acc
+        else:
+            if lista[0] == n:
+                acc += 1
+            return cant_interna(lista[1:], n, acc)
+    return cant_interna(lista,n)
+
+def sublista(lista: list[int], n: int, l: int) -> list[int]:
+    def interna(lista: list[int], n:int, l:int) -> list[int]:
+        if len(lista) < l:
+            raise IndexError()
+        if n == 0:
+            return lista
+        else:
+            return interna(lista[1:], n - 1, l)
+    return primeros(interna(lista, n, l), l)
+
+def intercalar(xs: list[int],ys: list[int]) -> list[int]:
+    if len(xs) == 1 and len(ys) == 1:
+        return xs + ys
+    else:
+        return [xs[0],ys[0]] + intercalar(xs[1:], ys[1:])
+
+def aplanar(xs: list[list[int]])->list[int]:
+    if not xs:
+        return []
+    else:
+        return xs[0] + aplanar(xs[1:])
+    
 if __name__ == "__main__":
-    xs: list[int] = [1,2,4,3,5,6,7,10]
+    xs: list[int] = [1,2,4,3,5,3,3,10]
     ys: list[int] = [1,3,4,6,8,0]
-    zs: list[int] = [-1,-3,-4,-6,-1]
+    zs: list[int] = [-1,-3,-4,-3,-1]
 
     print(f'xs: {xs}')
     print(f'ys: {ys}')
@@ -122,3 +162,14 @@ if __name__ == "__main__":
     print(f'máximo de zs: {maximo(zs)}')
 
     print(f'reversa de xs: {reversa(xs)}')
+
+    print(f'xs es palindromo? {es_palindromo(xs)}')
+    print(f'zs es palindromo? {es_palindromo(zs)}')
+
+    print(f'cantidad de veces que aparece 3 en xs: {cantidad(xs,3)}')
+    print(f'cantidad de veces que aparece 2 en ys: {cantidad(ys,2)}')
+
+    print(f'sublista de xs desde la pos 2 hasta la 6: {sublista(xs, 2, 4)}')
+
+
+    

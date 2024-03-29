@@ -167,6 +167,46 @@ class Lista(Generic[T]):
             nodo = Lista()
             nodo.insertar(self._head)
             return self._head.sig.reversa().concat(nodo)
+        
+    def primeros(self, n:int) -> ListaGenerica:
+        def interna(self, n: int, primeros: ListaGenerica = Lista()) -> ListaGenerica:
+            if len(primeros) == n:
+                return primeros
+            else:
+                primeros.insertar_ultimo(self._head)
+                return interna(self._head.sig, n, primeros)
+        return interna(self, n)
+
+    def cantidad(self, n: T) -> int:
+        if not isinstance(n, Nodo):
+            nodo = Nodo(n)
+        def cant_interna(self: ListaGenerica, nodo: Nodo, acc: int = 0) -> int:
+            if not self.existe(nodo.dato):
+                return acc
+            else:
+                if self._head == nodo:
+                    acc += 1
+                return cant_interna(self._head.sig, nodo, acc)
+        return cant_interna(self,nodo)
+
+    def intercalar(self, otra: ListaGenerica) -> ListaGenerica:
+        if len(self) == 1 and len(otra) == 1:
+            return self.concat(otra)
+        else:
+            lista_temp = Lista()
+            lista_temp.insertar_ultimo(self._head)
+            lista_temp.insertar_ultimo(otra._head)
+            return lista_temp.concat(self._head.sig.intercalar(otra._head.sig))
+
+    def sublista(self, n: int, l: int) -> ListaGenerica:
+        def interna(self: ListaGenerica, n: int, l: int) -> ListaGenerica:
+            if len(self) < 1:
+                raise IndexError()
+            if n == 0:
+                return self
+            else:
+                return interna(self._head.sig, n - 1, l)
+        return interna(self, n, l).primeros(l)
 
 if __name__ == '__main__':
     xs: Lista[int] = Lista()
@@ -213,4 +253,13 @@ if __name__ == '__main__':
         print(x)	# 20 -> 10 -> 4
 
     print(f'reversa de xs: {xs.reversa()}')
+
+    print(f'primeros 2 elementos de xs: {xs.primeros(2)}')
+
+    print(f'veces de 10 en xs: {xs.cantidad(10)}')
+
+    intercaladas = xs.intercalar(ys)
+    print(f'xs e ys intercaladas: {intercaladas}')
+
+    print(intercaladas.sublista(1,3))
     
