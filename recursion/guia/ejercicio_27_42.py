@@ -122,6 +122,22 @@ def aplanar(xs: list[list[int]])->list[int]:
     else:
         return xs[0] + aplanar(xs[1:])
     
+def longitudL(xs: list[list[int]]) -> int:
+    return len(aplanar(xs))
+    
+def quicksort(xs: list[int])->list[int]:
+    if len(xs) <= 1:
+        return xs
+    pivot = xs[-1]
+    left = []
+    right = []
+    for i in xs[0:-1]:
+        if i <= pivot:
+            left.append(i) 
+        else: 
+            right.append(i) 
+    return quicksort(left)+ [pivot] +quicksort(right)
+
 if __name__ == "__main__":
     xs: list[int] = [1,2,4,3,5,3,3,10]
     ys: list[int] = [1,3,4,6,8,0]
@@ -170,6 +186,8 @@ if __name__ == "__main__":
     print(f'cantidad de veces que aparece 2 en ys: {cantidad(ys,2)}')
 
     print(f'sublista de xs desde la pos 2 hasta la 6: {sublista(xs, 2, 4)}')
+
+    print(f'xs ordenada: {quicksort(xs)}')
 
 
     

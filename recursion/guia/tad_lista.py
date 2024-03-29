@@ -20,6 +20,9 @@ class Nodo(Generic[T]):
     
     def __eq__(self, otro):
         return self.dato == otro.dato
+    
+    def __le__(self, otro):
+        return self.dato <= otro.dato
 
 class Lista(Generic[T]):
     def __init__(self):
@@ -79,12 +82,18 @@ class Lista(Generic[T]):
             return self._head.sig.copy()
 
     def insertar(self, dato: T):
-        actual = copy(self)
-        self._head = Nodo(dato, actual)
+        if isinstance(dato, Nodo):
+            self._head = Nodo(dato.dato, Lista())
+        else:
+            actual = copy(self)
+            self._head = Nodo(dato, actual)
 
     def insertar_ultimo(self, dato: T):
         if self.es_vacia():
-            self._head = Nodo(dato, Lista())
+            if isinstance(dato, Nodo):
+                self._head = Nodo(dato.dato, Lista())
+            else:
+                self._head = Nodo(dato, Lista())
         else:
             self._head.sig.insertar_ultimo(dato)
 
@@ -207,7 +216,48 @@ class Lista(Generic[T]):
             else:
                 return interna(self._head.sig, n - 1, l)
         return interna(self, n, l).primeros(l)
-
+    
+    def aplanar(self) -> ListaGenerica:
+        try: 
+            if self.es_vacia():
+                return Lista()
+            else:
+                return self._head.dato.concat(self._head.sig.aplanar())
+        except:
+            return self
+        
+    def longitudL(self) -> int:
+        return len(self.aplanar())
+    
+    def quicksort(self) -> ListaGenerica:
+        if len(self) <= 1:
+            return self
+        pivot = self.ultimo() # int
+        left = Lista()
+        right = Lista()
+        for i in self.primeros(len(self) - 1): # self[:-1]
+            dato = i.dato
+            if dato <= pivot:
+                left.insertar_ultimo(dato)
+            else:
+                right.insertar_ultimo(dato)
+        lista_temp = Lista()
+        lista_temp.insertar_ultimo(pivot)
+        return left.quicksort().concat(lista_temp).concat(right.quicksort())
+    
+    # def quicksort(xs: list[int])->list[int]:
+    #     if len(xs) <= 1:
+    #         return xs
+    #     pivot = xs[-1]
+    #     left = []
+    #     right = []
+    #     for i in xs[0:-1]:
+    #         if i <= pivot:
+    #             left.append(i) 
+    #         else: 
+    #             right.append(i) 
+    #     return quicksort(left)+ [pivot] +quicksort(right)
+    
 if __name__ == '__main__':
     xs: Lista[int] = Lista()
     
@@ -232,7 +282,7 @@ if __name__ == '__main__':
     print(f'xs igual a xs?: {xs == xs}')
     print(f'xs igual a ys?: {xs == ys}')
 
-    print(f'ultimo de xs: {xs.ultimo()}')
+    print(f'ultimo de xs: {(xs.ultimo())}')
     print(f'ultimo de xs: {ys.ultimo()}')
 
     print(f'join de xs: {xs.join(" separador ")}')
@@ -243,17 +293,19 @@ if __name__ == '__main__':
     print(f'index de 100 en xs: {xs.index(100)}')
     print(f'index de 10 en xs: {xs.index(10)}')
 
-    print(f'xs e ys concatenadas: {xs.concat(ys)}')
+    print(f'xs e ys concatenadas: {xs.concat(ys)}') # arreglar
 
     print(f'xs[1]: {xs[1]}')
     print(f'xs[-1]: {xs[-1]}')				
 
     # Consumiendo como iterable
+    print('for each de x:')
     for x in xs:
         print(x)	# 20 -> 10 -> 4
 
     print(f'reversa de xs: {xs.reversa()}')
 
+    primeros = xs.primeros(2)
     print(f'primeros 2 elementos de xs: {xs.primeros(2)}')
 
     print(f'veces de 10 en xs: {xs.cantidad(10)}')
@@ -262,4 +314,14 @@ if __name__ == '__main__':
     print(f'xs e ys intercaladas: {intercaladas}')
 
     print(intercaladas.sublista(1,3))
+
+    lista = Lista()
+    lista.insertar(xs)
+    lista.insertar(ys)
+    print(f'lista : {lista}')
+    print(f'lista aplanada: {lista.aplanar()}')
+    print(f'longitud de lista: {lista.longitudL()}')
+
+    print(f'xs ordenada: {xs.quicksort()}')
     
+    print(f'intercalada ordenada: {intercaladas.quicksort()}')
