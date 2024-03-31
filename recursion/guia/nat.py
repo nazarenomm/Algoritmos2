@@ -60,6 +60,8 @@ def igual(x: Nat, y: Nat) -> bool:
         return igual(pred(x), pred(y))
     
 def menor(x: Nat, y: Nat) -> bool:
+    if es_cero(y):
+        return False
     if es_cero(x):
         return not es_cero(y)
     else:
@@ -95,7 +97,7 @@ def resta(x: Nat, y: Nat) -> Nat:
     if es_cero(y):
         return x
     else:
-        resta(pred(x), pred(y))
+        return resta(pred(x), pred(y))
     
 def producto(x: Nat, y: Nat) -> Nat:
     if es_cero(x) or es_cero(y):
@@ -108,10 +110,20 @@ def division(x: Nat, y: Nat) -> Nat:
         raise ValueError("El divisor no puede ser cero")
     elif es_cero(x):
         return cero()
-    else: #TODO
+    else:
+        def division_interna(dividendo: Nat, divisor: Nat, cociente: Nat) -> Nat:
+            if menor(dividendo, divisor):
+                return cociente
+            else:
+                return division_interna(resta(dividendo, divisor), divisor, suc(cociente))
+
+        return division_interna(x, y, cero())
     
 def potencia(base: Nat, exponente: Nat) -> Nat:
-    pass 
+    if es_cero(exponente):
+        return suc(cero())
+    else:
+        return producto(base, potencia(base, pred(exponente)))
 
 if __name__ == '__main__':
     n1: Nat = cero()                # n1 = 0
@@ -128,5 +140,7 @@ if __name__ == '__main__':
     
     print(f'n2 < n4: {menor(n2, n4)}')
     print(f'n3 > n4: {mayor(n3, n4)}')
-    print(f'producto(n2, n4): {producto(n2, n4)}')  # 14
-    print(f'division(n4, n2): {division(n4, n2)}')  # 3
+    print(f'producto(2, 7): {producto(n2, n4)}')  # 14
+    print(f'resta(7, 2): {resta(n4,n2)}')
+    print(f'division(7, 2): {division(n4, n2)}')  # 3
+    print(f'potencia(2, 3): {potencia(suc(suc(cero())), suc(suc(suc(cero()))))}')  # 8

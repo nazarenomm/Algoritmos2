@@ -149,12 +149,6 @@ def partes(lista):
             resultado.append([lista[0]] + parte)
         return resultado
     
-# 46. Definir la función permutaciones, que dada una lista de enteros, retorne una lista de
-# listas de enteros, donde cada lista-elemento es cada una de las posibles permutaciones
-# de la lista original.
-# Por ejemplo: permutaciones([6,2,3]) = [[6,2,3], [6,3,2], [2,3,6], [2,6,3], [3,2,6], [3,6,2]].
-# (no necesariamente en ese orden
-
 def permutaciones(lista: list[int]) -> list[int]:
     def interna(permutacion_actual, elementos_restantes):
         if len(elementos_restantes) == 0:
@@ -169,8 +163,26 @@ def permutaciones(lista: list[int]) -> list[int]:
     interna([], lista)
     return resultado
 
+def mostrar_elementos(lista: list[int]):
+    if lista:
+        print(lista[0])
+        mostrar_elementos(lista[1:])
 
+def posiciones_pares(lista: list[int]):
+    if len(lista) > 1:
+        print(lista[1])
+        posiciones_pares(lista[2:])
 
+def mostrar_elementos_triangular(arreglo: list):
+    def mostrar_linea(arreglo: list) -> str:
+        if len(arreglo) == 0:
+                return ''
+        else:
+            return str(arreglo[0]) + ', ' + mostrar_linea(arreglo[1:])
+    if len(arreglo) > 0:
+        print(mostrar_linea(arreglo)[:-2])
+        mostrar_elementos_triangular(arreglo[1:])
+    
 if __name__ == "__main__":
     xs: list[int] = [1,2,4,3,5,3,3,10]
     ys: list[int] = [1,3,4,6,8,0]
@@ -224,5 +236,13 @@ if __name__ == "__main__":
 
     print(partes([6,2,3]))
     print(permutaciones([6,2,3]))
+
+    print("Elementos de xs")
+    mostrar_elementos(xs)
+
+    print("Pares de xs")
+    posiciones_pares(xs)
+
+    mostrar_elementos_triangular(xs)
 
     

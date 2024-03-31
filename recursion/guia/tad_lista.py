@@ -157,7 +157,7 @@ class Lista(Generic[T]):
             else:
                 return repr(self._head) + ', ' + interna(self._head.sig)
         if self.es_vacia():
-            return ''
+            return 'Lista()'
         else:
             return f"Lista({interna(self)[:-2]})"
 
@@ -259,6 +259,16 @@ class Lista(Generic[T]):
                 head.insertar(self._head)
                 resultado.insertar_ultimo(head.concat(parte.dato))
             return resultado
+        
+    def mostrar_elementos(self):
+        if len(self) > 0:
+            print(self._head)
+            self._head.sig.mostrar_elementos()
+
+    def posiciones_pares(self):
+        if len(self) > 1:
+            print(self._head.sig._head)
+            self._head.sig._head.sig.posiciones_pares()
 
     
 if __name__ == '__main__':
@@ -330,3 +340,7 @@ if __name__ == '__main__':
     print(f'intercalada ordenada: {intercaladas.quicksort()}')
 
     print(f'partes de xs: {xs.partes()}')
+
+    xs.mostrar_elementos()
+
+    xs.posiciones_pares()
