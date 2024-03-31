@@ -245,18 +245,21 @@ class Lista(Generic[T]):
         lista_temp.insertar_ultimo(pivot)
         return left.quicksort().concat(lista_temp).concat(right.quicksort())
     
-    # def quicksort(xs: list[int])->list[int]:
-    #     if len(xs) <= 1:
-    #         return xs
-    #     pivot = xs[-1]
-    #     left = []
-    #     right = []
-    #     for i in xs[0:-1]:
-    #         if i <= pivot:
-    #             left.append(i) 
-    #         else: 
-    #             right.append(i) 
-    #     return quicksort(left)+ [pivot] +quicksort(right)
+    def partes(self) -> ListaGenerica:
+        if self.es_vacia():
+            lista_temp = Lista()
+            lista_temp.insertar(Lista())
+            return lista_temp
+        else:
+            subpartes = self._head.sig.partes()
+            resultado = Lista()
+            for parte in subpartes:
+                resultado.insertar_ultimo(parte)
+                head = Lista()
+                head.insertar(self._head)
+                resultado.insertar_ultimo(head.concat(parte.dato))
+            return resultado
+
     
 if __name__ == '__main__':
     xs: Lista[int] = Lista()
@@ -325,3 +328,5 @@ if __name__ == '__main__':
     print(f'xs ordenada: {xs.quicksort()}')
     
     print(f'intercalada ordenada: {intercaladas.quicksort()}')
+
+    print(f'partes de xs: {xs.partes()}')

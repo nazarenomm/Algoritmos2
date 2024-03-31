@@ -138,6 +138,39 @@ def quicksort(xs: list[int])->list[int]:
             right.append(i) 
     return quicksort(left)+ [pivot] +quicksort(right)
 
+def partes(lista):
+    if len(lista) == 0:
+        return [[]]
+    else:
+        sub_partes = partes(lista[1:])
+        resultado = []
+        for parte in sub_partes:
+            resultado.append(parte)
+            resultado.append([lista[0]] + parte)
+        return resultado
+    
+# 46. Definir la función permutaciones, que dada una lista de enteros, retorne una lista de
+# listas de enteros, donde cada lista-elemento es cada una de las posibles permutaciones
+# de la lista original.
+# Por ejemplo: permutaciones([6,2,3]) = [[6,2,3], [6,3,2], [2,3,6], [2,6,3], [3,2,6], [3,6,2]].
+# (no necesariamente en ese orden
+
+def permutaciones(lista: list[int]) -> list[int]:
+    def interna(permutacion_actual, elementos_restantes):
+        if len(elementos_restantes) == 0:
+            resultado.append(permutacion_actual)
+        else:
+            for i in range(len(elementos_restantes)):
+                nuevo_elemento = elementos_restantes[i]
+                nuevos_elementos_restantes = elementos_restantes[:i] + elementos_restantes[i+1:]
+                interna(permutacion_actual + [nuevo_elemento], nuevos_elementos_restantes)
+
+    resultado = []
+    interna([], lista)
+    return resultado
+
+
+
 if __name__ == "__main__":
     xs: list[int] = [1,2,4,3,5,3,3,10]
     ys: list[int] = [1,3,4,6,8,0]
@@ -189,5 +222,7 @@ if __name__ == "__main__":
 
     print(f'xs ordenada: {quicksort(xs)}')
 
+    print(partes([6,2,3]))
+    print(permutaciones([6,2,3]))
 
     
