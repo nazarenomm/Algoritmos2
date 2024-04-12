@@ -98,9 +98,6 @@ def buscar_falsa2(pila):
 
 # Si son iguales, la moneda más liviana es la tercera moneda no pesada.
 # Si una es más ligera, esa es la moneda más liviana.
-
-def burcar_falsa2(pila: Pila):
-    pass
     
 if __name__ == "__main__":
     monedas = Pila()
