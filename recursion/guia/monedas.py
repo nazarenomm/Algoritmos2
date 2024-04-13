@@ -1,7 +1,8 @@
 import copy
+from functools import reduce
 
 class Moneda:
-    def __init__(self, peso: int = 3):
+    def __init__(self, peso: float = 3):
         self.peso = peso
     
     def __lt__(self, otra: "Moneda"):
@@ -19,7 +20,6 @@ class Moneda:
 class Pila():
     def __init__(self):
         self.items = []
-
     
     def __len__(self) -> int:
         return len(self.items)
@@ -52,12 +52,19 @@ class Pila():
         return nueva_pila
     
     def dividir(self, n: int) -> list["Pila"]:
+        pila = self.copy()
         pilas = [Pila() for _ in range(n)]
-        while not self.esta_vacia():
+        while not pila.esta_vacia():
             for p in pilas:
-                if not self.esta_vacia():
-                    p.apilar(self.desapilar())
+                if not pila.esta_vacia():
+                    p.apilar(pila.desapilar())
         return pilas
+    
+    def peso(self) -> float:
+        return reduce(lambda acc, actual: acc + actual.peso, self.items, 0)
+    
+    def peso_prom(self) -> float:
+        return self.peso() / len(self)
 
 def buscar_falsa(pila: Pila) -> Moneda:
     pila_copia = pila.copy()
@@ -72,44 +79,33 @@ def buscar_falsa(pila: Pila) -> Moneda:
             return interna(pila, moneda_actual)
     return interna(pila_copia, ultima_moneda)
 
-def buscar_falsa2(pila): 
-    # dividir en 3
-    # pesar las subbpilas que tengan el mismo len o mejor usar promedio
-
-# Divide las 30 monedas en tres grupos de 10 monedas cada uno.
-# Pesa dos de estos grupos entre sí. Si el peso es igual,
-#entonces la moneda más liviana debe estar en el tercer grupo no pesado.
-# Si un grupo resulta más liviano, divide ese grupo en tres subgrupos de 3 monedas cada uno y
-# vuelve al paso 2 con estos subgrupos.
-# Repite este proceso hasta que encuentres la moneda más liviana o
-# hasta que hayas alcanzado el límite de 4 pesajes
-
-
-# Pesaje 1: Pesa dos grupos de 10 monedas cada uno.
-
-# Si son iguales, la moneda más liviana está en el tercer grupo no pesado.
-# Si uno es más ligero, procede al siguiente paso.
-# Pesaje 2: Toma el grupo más ligero de 10 monedas y divídelo en tres subgrupos de 3 monedas cada uno. 
-# Pesa los dos subgrupos de 3 monedas entre sí.
-
-# Si son iguales, la moneda más liviana está en el subgrupo no pesado.
-# Si uno es más ligero, procede al siguiente paso.
-# Pesaje 3: Dentro del subgrupo más ligero de 3 monedas, pesa dos de las monedas entre sí.
-
-# Si son iguales, la moneda más liviana es la tercera moneda no pesada.
-# Si una es más ligera, esa es la moneda más liviana.
+def buscar_falsa2(pila: Pila) -> tuple[Moneda,int]:
+    def interna(pila: Pila, acc: int) -> tuple[Moneda,int]:
+        if len(pila) == 1:
+            return pila.desapilar(), acc
+        else:
+            pilas = pila.dividir(3)
+            acc += 1 # uso la balanza
+            if pilas[0].peso_prom() < pilas[1].peso_prom():
+                pila_falsa = pilas[0]
+            elif pilas[1].peso_prom() < pilas[0].peso_prom():
+                pila_falsa = pilas[1]
+            else:
+                pila_falsa = pilas[2]
+            return interna(pila_falsa, acc)
+    return interna(pila, 0)
     
 if __name__ == "__main__":
     monedas = Pila()
 
-    cantidad_monedas = 10
+    cantidad_monedas = 30
     for i in range(cantidad_monedas):
-        if i == cantidad_monedas // 2:
+        if i == 1: #cantidad_monedas // 2:
             monedas.apilar(Moneda(1))
         else:
             monedas.apilar(Moneda())
-
-    print(monedas)
-    print("Mondeda encontrada: ", buscar_falsa(monedas))
+            
+    busqueda = buscar_falsa2(monedas)
+    print(f"Se encontró una {busqueda[0]} en {busqueda[1]} pesajes")
 
 
