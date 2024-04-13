@@ -1,4 +1,3 @@
-import copy
 from functools import reduce
 
 class Moneda:
@@ -94,7 +93,7 @@ def buscar_falsa2(pila: Pila) -> tuple[Moneda,int]:
                 pila_falsa = pilas[2]
             return interna(pila_falsa, acc)
     return interna(pila, 0)
-    
+
 if __name__ == "__main__":
     monedas = Pila()
 
@@ -107,5 +106,3 @@ if __name__ == "__main__":
             
     busqueda = buscar_falsa2(monedas)
     print(f"Se encontró una {busqueda[0]} en {busqueda[1]} pesajes")
-
-
