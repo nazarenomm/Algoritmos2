@@ -51,23 +51,28 @@ class Laberinto:
             self.posicion = (self.posicion[0], self.posicion[1] - 1)
         self.forma[self.posicion] = 0
 
-    def trazar_camino(self) -> "Laberinto":
-        laberinto = deepcopy(self)
-        salida_encontrada = (self.forma[self.size - 1, self.size - 1] == 0)
-        if salida_encontrada:
-            return laberinto
+    def trazar_camino(self) -> tuple["Laberinto", bool]:
+        salida = (self.forma[self.size - 1, self.size - 1] == 0)
+        if salida:
+            return self, True
         else:
+            salida_encontrada = False
+            solucion = deepcopy(self)
             direcciones = ['N', 'S', 'O', 'E']
-            while direcciones:
+            while direcciones and not salida_encontrada:
                 direccion = direcciones.pop(random.randint(0, len(direcciones) - 1))
-                if laberinto.hay_camino(direccion):
-                    laberinto.avanzar(direccion) 
-                    laberinto.trazar_camino()
-            return laberinto
+                if self.hay_camino(direccion):
+                    camino_actual = deepcopy(self)
+                    camino_actual.avanzar(direccion)
+                    solucion, salida_encontrada = camino_actual.trazar_camino()
+                
+            return solucion, salida_encontrada
                     
+    def contar_caminos(self):
+        pass
     
 
 if __name__ == "__main__":
     lab = Laberinto(10)
-    print("camino:")
+    print(lab)
     print(lab.trazar_camino())
