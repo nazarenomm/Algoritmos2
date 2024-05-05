@@ -96,18 +96,23 @@ class ArbolID3:
 if __name__ == "__main__":
     df = pd.read_csv("tp/play_tennis.csv")
     print(df.head())
+    print("\n")
 
     arbol = ArbolID3.crear_arbol(df, target= "play")
 
     print(f"entropia inicial: {arbol.raiz.entropia()}")
+    print("\n")
 
     print(f"information gain de splitear por {"wind = Weak ?"} : {arbol.information_gain("wind", "Weak")}")
+    print("\n")
 
     arbol.raiz.split("wind", "Weak")
 
     print(f"data del subarbol izquierdo luego del split (casos positivos):\n {arbol.raiz.si.raiz.data}")
     
-    print(f"data del subarbol derecho (casos negativos):\n {arbol.raiz.sd.raiz.data}")
+    
+    print(f"\ndata del subarbol derecho (casos negativos):\n {arbol.raiz.sd.raiz.data}")
+    print("\n")
 
     arbol.raiz.si.raiz.split("outlook", "Sunny")
 
