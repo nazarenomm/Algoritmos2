@@ -9,6 +9,7 @@ class Nodo:
         self.categoria: Optional[str] = None # lo mismo
         self.data: pd.DataFrame = data
         self.target: str = target
+        self.clase: str = None # cuando sea hoja deberia tener la clase predicha
         self.si: Optional[ArbolID3] = None
         self.sd: Optional[ArbolID3] = None
 
@@ -31,7 +32,6 @@ class Nodo:
             proporcion = proporciones.get(c, 0)
             entropia += proporcion * np.log2(proporcion)
         return -entropia
-    
     
 class ArbolID3:
     def __init__(self, nodo: Nodo) -> None:
@@ -82,6 +82,17 @@ class ArbolID3:
             raise TypeError("Arbol vacio")
         self.raiz.sd = sd
 
+    def imprimir(self, prefijo='', es_ultimo=True):
+        nodo = self.raiz
+        simbolo_rama = '└── ' if es_ultimo else '├── '
+        if nodo.atributo is not None:
+            print(prefijo + simbolo_rama + str(nodo.atributo))
+            prefijo += '    ' if es_ultimo else '│   '
+            nodo.si.imprimir(prefijo, False)
+            nodo.sd.imprimir(prefijo, True)
+        else:
+            print(prefijo + simbolo_rama + 'Clase:', str(nodo.clase))
+
 if __name__ == "__main__":
     df = pd.read_csv("tp/play_tennis.csv")
     print(df.head())
@@ -97,3 +108,7 @@ if __name__ == "__main__":
     print(f"data del subarbol izquierdo luego del split (casos positivos):\n {arbol.raiz.si.raiz.data}")
     
     print(f"data del subarbol derecho (casos negativos):\n {arbol.raiz.sd.raiz.data}")
+
+    arbol.raiz.si.raiz.split("outlook", "Sunny")
+
+    arbol.imprimir()
