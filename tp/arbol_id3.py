@@ -86,7 +86,7 @@ class ArbolID3:
         nodo = self.raiz
         simbolo_rama = '└── ' if es_ultimo else '├── '
         if nodo.atributo is not None:
-            print(prefijo + simbolo_rama + str(nodo.atributo))
+            print(prefijo + simbolo_rama + str(nodo.atributo) + " = " + str(nodo.categoria) + "?")
             prefijo += '    ' if es_ultimo else '│   '
             nodo.si.imprimir(prefijo, False)
             nodo.sd.imprimir(prefijo, True)
@@ -115,5 +115,6 @@ if __name__ == "__main__":
     print("\n")
 
     arbol.raiz.si.raiz.split("outlook", "Sunny")
+    arbol.raiz.sd.raiz.split("temp", "Mild")
 
     arbol.imprimir()
