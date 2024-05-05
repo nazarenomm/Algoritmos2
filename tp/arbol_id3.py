@@ -9,7 +9,7 @@ class Nodo:
         self.categoria: Optional[str] = None # lo mismo
         self.data: pd.DataFrame = data
         self.target: str = target
-        self.clase: str = None # cuando sea hoja deberia tener la clase predicha
+        self.clase: Optional[str] = None # cuando sea hoja deberia tener la clase predicha
         self.si: Optional[ArbolID3] = None
         self.sd: Optional[ArbolID3] = None
 
