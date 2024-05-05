@@ -82,16 +82,21 @@ class ArbolID3:
             raise TypeError("Arbol vacio")
         self.raiz.sd = sd
 
-    def imprimir(self, prefijo='', es_ultimo=True):
+    def imprimir(self, prefijo='  ', es_ultimo=True, es_raiz= True):
         nodo = self.raiz
-        simbolo_rama = '└── ' if es_ultimo else '├── '
-        if nodo.atributo is not None:
+        simbolo_rama = '└─no── ' if es_ultimo else '├─si── '
+        if es_raiz:
+            print(str(nodo.atributo) + " = " + str(nodo.categoria) + "?")
+            nodo.si.imprimir(prefijo, False, False)
+            nodo.sd.imprimir(prefijo, True, False)
+        elif nodo.atributo is not None:
             print(prefijo + simbolo_rama + str(nodo.atributo) + " = " + str(nodo.categoria) + "?")
-            prefijo += '    ' if es_ultimo else '│   '
-            nodo.si.imprimir(prefijo, False)
-            nodo.sd.imprimir(prefijo, True)
+            prefijo += ' '*10 if es_ultimo else '│' + ' '*9
+            nodo.si.imprimir(prefijo, False, False)
+            nodo.sd.imprimir(prefijo, True, False)
         else:
             print(prefijo + simbolo_rama + 'Clase:', str(nodo.clase))
+
 
 if __name__ == "__main__":
     df = pd.read_csv("tp/play_tennis.csv")
