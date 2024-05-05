@@ -189,6 +189,7 @@ class ArbolBinario(Generic[T]):
             nuevo.insertar_sd(self.sd().podar(dato))
             return nuevo 
         
+        
 
 
 if __name__ == "__main__":
