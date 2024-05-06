@@ -127,6 +127,7 @@ class ArbolID3:
 
 
 if __name__ == "__main__":
+    #https://www.kaggle.com/datasets/thedevastator/cancer-patients-and-air-pollution-a-new-link
     df = pd.read_csv("tp/cancer_patients.csv", index_col=0)
     df = df.drop("Patient Id", axis = 1)
     bins = [0, 15, 20, 30, 40, 50, 60, 70, float('inf')]
