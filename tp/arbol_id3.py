@@ -141,7 +141,7 @@ if __name__ == "__main__":
     
     arbol = ArbolID3.crear_arbol(x_train, y_train)
 
-    arbol.fit() # acá deberian ir x_train e y_train
+    arbol.fit() # acá deberian ir x_train e y_train, no en crear_arbol
 
     arbol.imprimir()
 
