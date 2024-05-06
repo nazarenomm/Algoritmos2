@@ -1,11 +1,12 @@
 import numpy as np
 
-array = np.arange(30)
+dias = np.arange(30)
 
-otroArray = np.random.choice(array, size=30)
+indices = np.random.choice(dias, size=100)
 
-tasa_likes = 50 * np.exp(-0.1 * array) # es un array que contiene los likes por dia
+tasa_likes = 50 * np.exp(-0.1 * dias)
 
-muestra = tasa_likes[otroArray]
+muestra = tasa_likes[indices] # muestra?
+Y = np.random.poisson(muestra, size=100) # MUESTRA
 
-print()
+print(Y)

@@ -103,22 +103,59 @@ class ArbolID3:
         else:
             print(prefijo + simbolo_rama + 'Clase:', str(nodo.clase))
 
-    # TODO
-    def predict(self, X: pd.DataFrame):
-        pass
+
+    def predict(self, X: pd.DataFrame) -> list[str]:
+        predicciones = []
+
+        def _interna(arbol, X):
+            nodo = arbol.raiz
+            if nodo.clase is not None:  # es hoja
+                predicciones.append(nodo.clase)
+            else:
+                atributo = nodo.atributo
+                categoria = nodo.categoria
+                valor_atributo = X[atributo].iloc[0]
+                if valor_atributo == categoria:
+                    _interna(arbol.raiz.si, X)
+                else:
+                    _interna(arbol.raiz.sd, X)
+
+        for _, row in X.iterrows():
+            _interna(self, pd.DataFrame([row]))
+        
+        return predicciones
 
 
 if __name__ == "__main__":
-    df = pd.read_csv("tp/play_tennis.csv", index_col=0)
+    df = pd.read_csv("tp/cancer_patients.csv", index_col=0)
+    df = df.drop("Patient Id", axis = 1)
+    bins = [0, 15, 20, 30, 40, 50, 60, 70, float('inf')]
+    labels = ['0-15', '15-20', '20-30', '30-40', '40-50', '50-60', '60-70', '70+']
+    df['Age'] = pd.cut(df['Age'], bins=bins, labels=labels, right=False)
 
-    X = df.drop('play', axis=1)
-    y = df['play'] 
+    X = df.drop('Level', axis=1)
+    y = df['Level']
+
+    x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
     
-    arbol = ArbolID3.crear_arbol(X, y)
+    arbol = ArbolID3.crear_arbol(x_train, y_train)
 
-    arbol.fit()
+    arbol.fit() # acá deberian ir x_train e y_train
 
     arbol.imprimir()
+
+    y_pred = arbol.predict(x_test)
+
+    def accuracy_score(y_true: list[str], y_pred: list[str]) -> float:
+        if len(y_true) != len(y_pred):
+            raise ValueError()
+        correctas = sum(1 for yt, yp in zip(y_true, y_pred) if yt == yp)
+        precision = correctas / len(y_true)
+        return precision
+    
+    print(accuracy_score(y_test.tolist(), y_pred))
+
 
 
 
