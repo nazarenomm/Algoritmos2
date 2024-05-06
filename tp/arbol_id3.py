@@ -1,24 +1,26 @@
 from typing import Optional
+from sklearn.model_selection import train_test_split
 import pandas as pd
 import numpy as np
 from copy import deepcopy
 
 class Nodo:
-    def __init__(self, data: pd.DataFrame, target: str) -> None: #data : data de entrenamiento
+    def __init__(self, data: pd.DataFrame, target: pd.Series) -> None: #data : data de entrenamiento
         self.atributo: Optional[str] = None # se setea cuando se haga un split
         self.categoria: Optional[str] = None # lo mismo
         self.data: pd.DataFrame = data
-        self.target: str = target
+        self.target: pd.Series = target
         self.clase: Optional[str] = None # cuando sea hoja deberia tener la clase predicha
         self.si: Optional[ArbolID3] = None
         self.sd: Optional[ArbolID3] = None
 
     def split(self, atributo: str, categoria: str) -> None:
-        # nuevo = deepcopy(self) # TODO: copy propio
         nueva_data_si = self.data[self.data[atributo] == categoria]
         nueva_data_sd = self.data[self.data[atributo] != categoria]
-        nodo_izq = Nodo(nueva_data_si, self.target)
-        nodo_der = Nodo(nueva_data_sd, self.target)
+        nueva_target_si = self.target[self.data[atributo] == categoria]
+        nueva_target_sd = self.target[self.data[atributo] != categoria]
+        nodo_izq = Nodo(nueva_data_si, nueva_target_si)
+        nodo_der = Nodo(nueva_data_sd, nueva_target_sd)
         self.sd = ArbolID3(nodo_der)
         self.si = ArbolID3(nodo_izq)
         self.atributo = atributo
@@ -26,8 +28,8 @@ class Nodo:
     
     def entropia(self) -> float:
         entropia = 0
-        proporciones = self.data[self.target].value_counts(normalize= True)
-        target_categorias = self.data[self.target].unique()
+        proporciones = self.target.value_counts(normalize= True)
+        target_categorias = self.target.unique()
         for c in target_categorias:
             proporcion = proporciones.get(c, 0)
             entropia += proporcion * np.log2(proporcion)
@@ -37,19 +39,36 @@ class ArbolID3:
     def __init__(self, nodo: Nodo) -> None:
         self.raiz: Nodo = nodo
 
-    # solo para probar metodos
     @staticmethod
-    def crear_arbol(df: pd.DataFrame, target: str):
+    def crear_arbol(df: pd.DataFrame, target: pd.Series):
         nodo = Nodo(df, target)
         return ArbolID3(nodo)
+    
+    def _mejor_split(self) -> tuple[str, str]:
+        mejor_ig = -1
+        mejor_atributo = None
+        mejor_categoria = None
+        atributos = self.raiz.data.columns
 
-    def fit(self, df: pd.DataFrame, target: str) -> "ArbolID3": # construye el arbol (?)
-        pass
-        # decido cual va a ser atributo y su valor por el que splitear y guardo el atributo como raiz
-        # hago el split con ese atributo y valor (categoria)
-        # repito recursivamente
+        for atributo in atributos:
+            for categoria in self.raiz.data[atributo].unique():
+                ig = self.information_gain(atributo, categoria)
+                if ig > mejor_ig:
+                    mejor_ig = ig
+                    mejor_atributo = atributo
+                    mejor_categoria = categoria
+        
+        return mejor_atributo, mejor_categoria
 
-    # podria ser helper de fit o split
+    def fit(self) -> None:
+        if len(self.raiz.target.unique()) == 1:
+            self.raiz.clase = self.raiz.target.value_counts().idxmax()
+        else:
+            mejor_atributo, mejor_categoria = self._mejor_split()
+            self.raiz.split(mejor_atributo, mejor_categoria)
+            self.raiz.si.fit()
+            self.raiz.sd.fit()
+        
     def information_gain(self, atributo: str, categoria: str) -> float:
         # recopilo informacion necesaria para el calculo
         entropia_actual = self.raiz.entropia()
@@ -61,7 +80,7 @@ class ArbolID3:
         nuevo = deepcopy(self)
         nuevo.raiz.split(atributo, categoria)
 
-        # calculo IG (horrible)
+        # calculo IG
         entropia_izq = nuevo.raiz.si.raiz.entropia()
         len_izq = len(nuevo.raiz.si.raiz.data)
         entropia_der = nuevo.raiz.sd.raiz.entropia()
@@ -69,20 +88,7 @@ class ArbolID3:
 
         return information_gain - ((len_izq/len_actual)*entropia_izq + (len_der/len_actual)*entropia_der)
     
-    def es_vacio(self) -> bool:
-        return self.raiz is None
-    
-    def insertar_si(self,si:"ArbolID3") -> None:
-        if self.es_vacio():
-            raise TypeError("Arbol vacio")
-        self.raiz.si = si
-    
-    def insertar_sd(self,sd:"ArbolID3") -> None:
-        if self.es_vacio():
-            raise TypeError("Arbol vacio")
-        self.raiz.sd = sd
-
-    def imprimir(self, prefijo='  ', es_ultimo=True, es_raiz= True):
+    def imprimir(self, prefijo: str = '  ', es_ultimo: bool = True, es_raiz: bool = True) -> None:
         nodo = self.raiz
         simbolo_rama = '└─no── ' if es_ultimo else '├─si── '
         if es_raiz:
@@ -97,29 +103,22 @@ class ArbolID3:
         else:
             print(prefijo + simbolo_rama + 'Clase:', str(nodo.clase))
 
+    # TODO
+    def predict(self, X: pd.DataFrame):
+        pass
+
 
 if __name__ == "__main__":
-    df = pd.read_csv("tp/play_tennis.csv")
-    print(df.head())
-    print("\n")
+    df = pd.read_csv("tp/play_tennis.csv", index_col=0)
 
-    arbol = ArbolID3.crear_arbol(df, target= "play")
-
-    print(f"entropia inicial: {arbol.raiz.entropia()}")
-    print("\n")
-
-    print(f"information gain de splitear por {"wind = Weak ?"} : {arbol.information_gain("wind", "Weak")}")
-    print("\n")
-
-    arbol.raiz.split("wind", "Weak")
-
-    print(f"data del subarbol izquierdo luego del split (casos positivos):\n {arbol.raiz.si.raiz.data}")
+    X = df.drop('play', axis=1)
+    y = df['play'] 
     
-    
-    print(f"\ndata del subarbol derecho (casos negativos):\n {arbol.raiz.sd.raiz.data}")
-    print("\n")
+    arbol = ArbolID3.crear_arbol(X, y)
 
-    arbol.raiz.si.raiz.split("outlook", "Sunny")
-    arbol.raiz.sd.raiz.split("temp", "Mild")
+    arbol.fit()
 
     arbol.imprimir()
+
+
+
