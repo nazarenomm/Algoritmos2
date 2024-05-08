@@ -10,9 +10,15 @@ class Nodo:
         self.categoria: Optional[str] = None # lo mismo
         self.data: pd.DataFrame = data
         self.target: pd.Series = target
-        self.clase: Optional[str] = None # cuando sea hoja deberia tener la clase predicha
+        self.clase: Optional[str] = None # cuando sea hoja deberia tener la clase predicha, deberia estar seteado para todos los nodos, sino podria haber problemas con el podado
         self.si: Optional[ArbolID3] = None
         self.sd: Optional[ArbolID3] = None
+        clases = target.unique()
+        values = []
+        count = target.value_counts()
+        for c in clases:   
+            values.append(count.get(c, 0))
+        self.values: list[int] = values # cuando alguna clase no esta en el target no la cuenta, arreglar
 
     def split(self, atributo: str, categoria: str) -> None:
         nueva_data_si = self.data[self.data[atributo] == categoria]
@@ -42,6 +48,7 @@ class ArbolID3:
     @staticmethod
     def crear_arbol(df: pd.DataFrame, target: pd.Series):
         nodo = Nodo(df, target)
+
         return ArbolID3(nodo)
     
     def _mejor_split(self) -> tuple[str, str]:
@@ -91,17 +98,32 @@ class ArbolID3:
     def imprimir(self, prefijo: str = '  ', es_ultimo: bool = True, es_raiz: bool = True) -> None:
         nodo = self.raiz
         simbolo_rama = '└─no── ' if es_ultimo else '├─si── '
+        pregunta =str(nodo.atributo) + " = " + str(nodo.categoria) + "?" 
+        entropia = self.raiz.entropia()
+        samples = len(self.raiz.data)
+        values = self.raiz.values
         if es_raiz:
-            print(str(nodo.atributo) + " = " + str(nodo.categoria) + "?")
+            print(pregunta)
+            print(f"Entropia: {round(entropia, 2)}")
+            print(f"Samples: {samples}")
+            print(f"Values: {values}")
             nodo.si.imprimir(prefijo, False, False)
             nodo.sd.imprimir(prefijo, True, False)
         elif nodo.atributo is not None:
-            print(prefijo + simbolo_rama + str(nodo.atributo) + " = " + str(nodo.categoria) + "?")
+            print(prefijo + simbolo_rama + pregunta)
+            prefijo2 = prefijo + " " * (len(simbolo_rama)) if es_ultimo else prefijo +"│" + " " * (len(simbolo_rama) - 1)
+            print(prefijo2 + f"Entropia: {round(entropia, 2)}")
+            print(prefijo2 + f"Samples: {samples}")
+            print(prefijo2 + f"Values: {values}")
             prefijo += ' '*10 if es_ultimo else '│' + ' '*9
             nodo.si.imprimir(prefijo, False, False)
             nodo.sd.imprimir(prefijo, True, False)
         else:
+            prefijo_hoja = prefijo + " "*len(simbolo_rama) if es_ultimo else prefijo + "│" + " "*(len(simbolo_rama) -1)
             print(prefijo + simbolo_rama + 'Clase:', str(nodo.clase))
+            print(prefijo_hoja + f"Entropia: {round(entropia, 2)}")
+            print(prefijo_hoja + f"Samples: {samples}")
+            print(prefijo_hoja + f"Values: {values}")
 
 
     def predict(self, X: pd.DataFrame) -> list[str]:
@@ -127,7 +149,11 @@ class ArbolID3:
 
 
 if __name__ == "__main__":
-    #https://www.kaggle.com/datasets/thedevastator/cancer-patients-and-air-pollution-a-new-link
+    # #https://www.kaggle.com/datasets/thedevastator/cancer-patients-and-air-pollution-a-new-link
+    # df = pd.read_csv("./play_tennis.csv")
+    # X = df.drop('play', axis=1)
+    # y = df['play']
+
     df = pd.read_csv("tp/cancer_patients.csv", index_col=0)
     df = df.drop("Patient Id", axis = 1)
     bins = [0, 15, 20, 30, 40, 50, 60, 70, float('inf')]
@@ -137,7 +163,7 @@ if __name__ == "__main__":
     X = df.drop('Level', axis=1)
     y = df['Level']
 
-    x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state= 42)
 
     
     arbol = ArbolID3.crear_arbol(x_train, y_train)
@@ -156,7 +182,5 @@ if __name__ == "__main__":
         return precision
     
     print(accuracy_score(y_test.tolist(), y_pred))
-
-
 
 
