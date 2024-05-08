@@ -11,7 +11,7 @@ class Nodo:
         self.categoria: Optional[str] = None # LA CATEGORIA RESULTANTE DEL SPLIT ANTERIOR
         self.data: pd.DataFrame = data
         self.target: pd.Series = target
-        self.clase: Optional[str] = None # cuando sea hoja deberia tener la clase predicha, no deberia ser None, TODO
+        self.clase: Optional[str] = None # TODO: actualmente se setea cuando sea hoja, pero siempre deberia tener un valor, por ej: el valor que más se repite
         self.subs: list[ArbolID3] = []
 
     def split(self, atributo: str) -> None:
