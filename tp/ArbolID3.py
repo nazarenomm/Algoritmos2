@@ -16,12 +16,11 @@ class Nodo:
 
     def split(self, atributo: str) -> None:
         self.atributo = atributo # guardo el atributo por el cual spliteo
-        for categoria in self.data[atributo].unique(): # recorre los valores del atributo
-            nueva_data = self.data[self.data[atributo] == categoria] # la data del nuevo nodo
-            nueva_data = nueva_data.drop(atributo, axis = 1) # sin el atributo por el cual ya se filtró
-            nuevo_target = self.target[self.data[atributo] == categoria] # el target del nuevo nodo
-            nuevo = Nodo(nueva_data, nuevo_target) # crea el nodo
-            # nuevo.atributo = atributo # el atributo se setea cuando ese nuevo nodo sea spliteado
+        for categoria in self.data[atributo].unique():
+            nueva_data = self.data[self.data[atributo] == categoria]
+            nueva_data = nueva_data.drop(atributo, axis = 1) # la data del nuevo nodo sin el atributo por el cual ya se filtró
+            nuevo_target = self.target[self.data[atributo] == categoria]
+            nuevo = Nodo(nueva_data, nuevo_target)
             nuevo.categoria = categoria
             self.subs.append(ArbolID3(nuevo))
             
@@ -83,20 +82,6 @@ class ArbolID3:
 
         information_gain = entropia_actual - entropias_subarboles
         return information_gain
-
-    # def _calcular_entropia_longitud(self, sub_arbol) -> tuple[float, int]:
-    #     if sub_arbol.raiz.clase:
-    #         # Si el nodo es una hoja, devolvemos la entropía como 0 y la longitud de los datos en el nodo
-    #         return 0, len(sub_arbol.raiz.data)
-    #     else:
-    #         # Si el nodo no es una hoja, calculamos la entropía y la longitud recursivamente para cada subárbol
-    #         entropia_subarbol = sub_arbol.raiz.entropia()
-    #         len_subarbol = 0
-    #         for sub_sub_arbol in sub_arbol.raiz.subs:
-    #             entropia, longitud = self._calcular_entropia_longitud(sub_sub_arbol)
-    #             entropia_subarbol += entropia
-    #             len_subarbol += longitud
-    #         return entropia_subarbol, len_subarbol
     
     def imprimir(self, prefijo: str = '  ', es_ultimo: bool = True, es_raiz: bool = True) -> None:
         nodo = self.raiz
@@ -141,16 +126,15 @@ class ArbolID3:
 
         def _interna(arbol, X):
             nodo = arbol.raiz
-            if nodo.clase is not None:  # es hoja
+            if not nodo.subs:  # es hoja
                 predicciones.append(nodo.clase)
             else:
                 atributo = nodo.atributo
-                categoria = nodo.categoria
+                # categoria = nodo.categoria
                 valor_atributo = X[atributo].iloc[0]
-                if valor_atributo == categoria:
-                    _interna(arbol.raiz.si, X)
-                else:
-                    _interna(arbol.raiz.sd, X)
+                for i, subarbol in enumerate(nodo.subs):
+                    if valor_atributo == subarbol.raiz.categoria:
+                        _interna(arbol.raiz.subs[i], X)
 
         for _, row in X.iterrows():
             _interna(self, pd.DataFrame([row]))
@@ -178,16 +162,16 @@ if __name__ == "__main__":
 
     arbol.imprimir()
 
-    # y_pred = arbol.predict(x_test)
+    y_pred = arbol.predict(x_test)
 
-    # def accuracy_score(y_true: list[str], y_pred: list[str]) -> float:
-    #     if len(y_true) != len(y_pred):
-    #         raise ValueError()
-    #     correctas = sum(1 for yt, yp in zip(y_true, y_pred) if yt == yp)
-    #     precision = correctas / len(y_true)
-    #     return precision
+    def accuracy_score(y_true: list[str], y_pred: list[str]) -> float:
+        if len(y_true) != len(y_pred):
+            raise ValueError()
+        correctas = sum(1 for yt, yp in zip(y_true, y_pred) if yt == yp)
+        precision = correctas / len(y_true)
+        return precision
     
-    # print(accuracy_score(y_test.tolist(), y_pred))
+    print(accuracy_score(y_test.tolist(), y_pred))
 
 
 
