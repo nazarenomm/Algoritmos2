@@ -170,13 +170,13 @@ class ArbolBinario(Generic[T]):
             raise ValueError("Arbol Vacio")
         padres = [] #feo, despues lo cambio (aunque si los nodos se pueden repetir en el arbol esta bien)
         def _interna(arbol, dato: T):
-            if not arbol.raiz.si.es_vacio() and arbol.raiz.si.raiz.dato == dato:
+            if not arbol.si().es_vacio() and arbol.si().raiz.dato == dato:
                 padres.append(arbol.raiz.dato)
-            elif not arbol.raiz.sd.es_vacio() or arbol.raiz.sd.raiz.dato == dato:
+            elif not arbol.sd().es_vacio() or arbol.sd().raiz.dato == dato:
                 padres.append(arbol.raiz.dato)
             else:
-                _interna(arbol.raiz.si, dato)
-                _interna(arbol.raiz.sd, dato)
+                _interna(arbol.si(), dato)
+                _interna(arbol.sd(), dato)
         _interna(self, dato)
         return padres[0]
     
@@ -227,10 +227,101 @@ class ArbolBinario(Generic[T]):
         _interna(self, nuevo_arbol)
         return nuevo_arbol
     
+    def si(self):
+        return self.raiz.si
+    
+    def sd(self):
+        return self.raiz.sd
+    
     # ejercicio 8
-    def balanceado(self):
-        pass
+    def ramas(self) -> list[list[T]]:
+        if self.es_vacio():
+            raise ValueError("Arbol Vacio")
+        
+        ramas = []
+        def _backtrack(arbol, rama:list[T] =[]) -> None:
+            
+            rama.append(arbol.raiz.dato)
 
+            if arbol.raiz.es_hoja():
+                ramas.append(rama.copy())
+            else:
+                if not arbol.raiz.si.es_vacio():
+                    _backtrack(arbol.raiz.si, rama)
+                if not arbol.raiz.sd.es_vacio():
+                    _backtrack(arbol.raiz.sd, rama)
+
+            rama.pop()
+
+        _backtrack(self)
+        return ramas
+
+    # ejercicio 9
+    def balanceado(self) -> bool:
+        if self.es_vacio():
+            raise ValueError("Arbol Vacio")
+        
+        longitud_ramas = []
+        def _backtrack(arbol, rama:list[T] =[]) -> None:
+            
+            rama.append(arbol.raiz.dato)
+
+            if arbol.raiz.es_hoja():
+                longitud_ramas.append(len(rama))
+            else:
+                if not arbol.raiz.si.es_vacio():
+                    _backtrack(arbol.raiz.si, rama)
+                if not arbol.raiz.sd.es_vacio():
+                    _backtrack(arbol.raiz.sd, rama)
+
+            rama.pop()
+
+        _backtrack(self)
+        
+        balanceado = (max(longitud_ramas) - min(longitud_ramas)) <= 1
+        return balanceado
+    
+    def copy(self) ->"ArbolBinario[T]":
+        if self.es_vacio():
+            nuevo =  ArbolBinario()
+        else:
+            nuevo = ArbolBinario.crear_arbol(self.raiz.dato)
+            nuevo.agregar_si(self.si().copy())
+            nuevo.agregar_sd(self.sd().copy())
+        return nuevo 
+    
+
+    # ejercicio 10
+    def espejo(self) -> "ArbolBinario[T]":
+        if self.es_vacio():
+            nuevo_arbol = ArbolBinario()
+        else:
+            nuevo_arbol = ArbolBinario.crear_arbol(self.raiz.dato)
+            nuevo_arbol.agregar_si(self.sd().espejo())
+            nuevo_arbol.agregar_sd(self.si().espejo())
+        return nuevo_arbol
+    
+    # ejercicio 11
+    # paso
+
+    # ejercicio 12.a
+    def preorden(self) -> list[T]:
+        if self.es_vacio():
+            return []
+        else:
+            return [self.raiz.dato] + self.si().preorden() + self.sd().preorden()
+    
+    def inorden(self) -> list[T]:
+        if self.es_vacio():
+            return []
+        else:
+            return self.si().inorden() + [self.raiz.dato] + self.sd().inorden()
+        
+    def posorden(self) -> list[T]:
+        if self.es_vacio():
+            return []
+        else:
+            return self.si().posorden() + self.sd().posorden() + [self.raiz.dato]
 
 if __name__ == "__main__":
     arbol = ArbolBinario.crear_arbol(1)
@@ -262,7 +353,14 @@ if __name__ == "__main__":
     print(f"7 pertenece al arbol?: {arbol.pertenece(7)}")
     print(f"altura: {arbol.altura()}")
     print(f"nivel de 4: {arbol.nivel(4)}")
-    print(f"padre de 6? : {arbol.padre(6)}")
+    print(f"padre de 6? : {arbol.padre(6)}") # anda mal
     print(f"hijos de 2: {arbol.hijos(2)}")
     print(f"antecesores de 10: {arbol.antecesores(10)}")
-    print(f"arbol sin hojas:\n{arbol.sinHojas()}")
+    #print(f"arbol sin hojas:\n{arbol.sinHojas()}")
+    print(f"ramas: {arbol.ramas()}")
+    print(f"balanceado? :  {arbol.balanceado()}")
+    #print(f"espejo: \n{arbol.espejo()}")
+    print(f"preorder: {arbol.preorden()}")
+    print(f"inorder: {arbol.inorden()}")
+    print(f"posorder: {arbol.posorden()}")
+    
