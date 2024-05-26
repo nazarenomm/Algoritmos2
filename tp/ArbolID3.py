@@ -1,5 +1,4 @@
 from typing import Generic, Optional, TypeVar, Callable, Any 
-from functools import wraps
 from sklearn.model_selection import train_test_split
 import pandas as pd
 import numpy as np
@@ -22,7 +21,7 @@ class Nodo:
             nuevo_target = self.target[self.data[atributo] == categoria]
             nuevo = Nodo(nueva_data, nuevo_target)
             nuevo.categoria = categoria
-            self.subs.append(ArbolID3(nuevo))
+            self.subs.append(ArbolID3.nuevo_arbol(nuevo))
             
     
     def entropia(self) -> float:
@@ -32,16 +31,22 @@ class Nodo:
         for c in target_categorias:
             proporcion = proporciones.get(c, 0)
             entropia += proporcion * np.log2(proporcion)
-        return -entropia
+        return -entropia if entropia != 0 else 0
     
 class ArbolID3:
-    def __init__(self, nodo: Nodo) -> None:
-        self.raiz: Nodo = nodo
+    def __init__(self) -> None:
+        self.raiz: Optional[Nodo] = None
 
     @staticmethod
-    def crear_arbol(df: pd.DataFrame, target: pd.Series):
-        nodo = Nodo(df, target)
-        return ArbolID3(nodo)
+    def crear_arbol(X: pd.DataFrame, y: pd.Series):
+        nodo = Nodo(X, y)
+        return ArbolID3.nuevo_arbol(nodo)
+    
+    @staticmethod
+    def nuevo_arbol(nodo: Nodo): # es para usar en split()
+        arbol = ArbolID3()
+        arbol.raiz = nodo
+        return arbol
     
     def _mejor_split(self) -> str:
         mejor_ig = -1
@@ -49,7 +54,6 @@ class ArbolID3:
         atributos = self.raiz.data.columns
 
         for atributo in atributos:
-            # for categoria in self.raiz.data[atributo].unique():
             ig = self.information_gain(atributo)
             if ig > mejor_ig:
                 mejor_ig = ig
@@ -59,11 +63,12 @@ class ArbolID3:
 
     def fit(self) -> None:
         if len(self.raiz.target.unique()) == 1 or len(self.raiz.data.columns) == 0:
-            self.raiz.clase = self.raiz.target.value_counts().idxmax()
+            self.raiz.clase = self.raiz.target.value_counts().idxmax() # hace falta? no seria el unico valor del target?
         else:
             mejor_atributo = self._mejor_split()
             self.raiz.split(mejor_atributo)
-            [sub_arbol.fit() for sub_arbol in self.raiz.subs]
+            for sub_arbol in self.raiz.subs:
+                sub_arbol.fit()
             
         
     def information_gain(self, atributo: str) -> float:
@@ -87,12 +92,11 @@ class ArbolID3:
         nodo = self.raiz
         simbolo_rama = '└─── ' if es_ultimo else '├─── '
         pregunta = str(nodo.atributo) + "?"
-        #len_str = len(str(nodo.data[nodo.atributo].max()))
         rta = "Valor: " + str(nodo.categoria)
         entropia = f"Entropia: {round(self.raiz.entropia(), 2)}"
         samples = f"Samples: {len(self.raiz.data)}"
         if es_raiz:
-            print(entropia)
+            print(entropia) # todo esto podria estar en un __str__ del nodo
             print(samples)
             print(pregunta)
 
