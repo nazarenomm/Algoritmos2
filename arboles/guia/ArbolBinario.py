@@ -322,6 +322,26 @@ class ArbolBinario(Generic[T]):
             return []
         else:
             return self.si().posorden() + self.sd().posorden() + [self.raiz.dato]
+        
+    # ejercicio 12.b
+    def preorden_cola(self) -> list[T]:
+        def _recorrido(cola: list[ArbolBinario[T]], camino: list[T])-> list[T]:               
+            if not cola:
+                return camino
+            else:
+                arbol = cola.pop()
+                if not arbol.es_vacio():
+                    camino.append(arbol.raiz.dato)
+                    cola.append(arbol.sd())
+                    cola.append(arbol.si())
+                return _recorrido(cola, camino)
+        return _recorrido([self], [])
+    
+    
+    def inorden_cola(self) -> list[T]:
+        pass
+
+    
 
 if __name__ == "__main__":
     arbol = ArbolBinario.crear_arbol(1)
@@ -361,6 +381,8 @@ if __name__ == "__main__":
     print(f"balanceado? :  {arbol.balanceado()}")
     #print(f"espejo: \n{arbol.espejo()}")
     print(f"preorder: {arbol.preorden()}")
+    print(f"preorder cola: {arbol.preorden_cola()}")
     print(f"inorder: {arbol.inorden()}")
+    print(f"inorder cola: {arbol.inorden_cola()}")
     print(f"posorder: {arbol.posorden()}")
     
