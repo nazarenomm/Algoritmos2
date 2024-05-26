@@ -80,6 +80,7 @@ class ArbolBinario(Generic[T]):
         return f"ArbolBinario(raiz: {repr(self.raiz)})"
     
     
+    # ejercicio 17
     def __str__(self) -> str:
         if self.es_vacio():
             return "Arbol Vacio"
@@ -165,20 +166,23 @@ class ArbolBinario(Generic[T]):
         return _interna(self, dato)
     
     # ejercicio 6.c
-    def padre(self, dato: T) -> T:
-        if self.es_vacio():
-            raise ValueError("Arbol Vacio")
-        padres = [] #feo, despues lo cambio (aunque si los nodos se pueden repetir en el arbol esta bien)
-        def _interna(arbol, dato: T):
-            if not arbol.si().es_vacio() and arbol.si().raiz.dato == dato:
-                padres.append(arbol.raiz.dato)
-            elif not arbol.sd().es_vacio() or arbol.sd().raiz.dato == dato:
-                padres.append(arbol.raiz.dato)
-            else:
-                _interna(arbol.si(), dato)
-                _interna(arbol.sd(), dato)
-        _interna(self, dato)
-        return padres[0]
+    def padre(self, dato: T) -> T | None:
+        if not self.si().es_vacio() and self.si().raiz.dato == dato:
+            return self.raiz.dato
+        
+        if not self.sd().es_vacio() and self.sd().raiz.dato == dato:
+            return self.raiz.dato
+
+        padre_izq = None
+        padre_der = None
+
+        if not self.si().es_vacio():
+            padre_izq = self.si().padre(dato)
+        if not self.sd().es_vacio():
+            padre_der = self.sd().padre(dato)
+
+        return padre_izq if padre_izq is not None else padre_der
+
     
     # ejercicio 6.d
     def hijos(self, dato: T) -> list[T]:
@@ -325,22 +329,99 @@ class ArbolBinario(Generic[T]):
         
     # ejercicio 12.b
     def preorden_cola(self) -> list[T]:
-        def _recorrido(cola: list[ArbolBinario[T]], camino: list[T])-> list[T]:               
-            if not cola:
+        def _recorrido(pila: list[ArbolBinario[T]], camino: list[T])-> list[T]:               
+            if not pila:
                 return camino
             else:
-                arbol = cola.pop()
+                arbol = pila.pop()
                 if not arbol.es_vacio():
                     camino.append(arbol.raiz.dato)
-                    cola.append(arbol.sd())
-                    cola.append(arbol.si())
-                return _recorrido(cola, camino)
+                    pila.append(arbol.sd())
+                    pila.append(arbol.si())
+                return _recorrido(pila, camino)
         return _recorrido([self], [])
     
     
     def inorden_cola(self) -> list[T]:
         pass
 
+    
+    # ejercicio 13
+    def bfs(self):
+        bfs = []
+        def _recorrer(cola: list[ArbolBinario[T]]):
+            if cola:
+                arbol = cola.pop(0)
+                bfs.append(arbol.raiz.dato)
+                if not arbol.si().es_vacio():
+                    cola.append(arbol.si())
+                if not arbol.sd().es_vacio():
+                    cola.append(arbol.sd())
+                _recorrer(cola)
+
+        _recorrer([self])
+        return bfs
+    
+    # ejercicio 14
+    def insertar(self, valor: T) -> "ArbolBinario[T]":
+        # agrega un nodo en el subarbol más pequeño, si son iguales:  al izquierdo
+        # deberia agregarselo al 6, a izq
+        # la idea es balancear un poco el arbol
+        nuevo_arbol = self.copy()
+        def _interna(arbol):
+            if arbol.es_vacio():
+                arbol.raiz = valor
+            elif arbol.raiz.es_hoja():
+                arbol.raiz.si = ArbolBinario.crear_arbol(valor)
+            else:
+                alt_si = arbol.si().altura()
+                alt_sd = arbol.sd().altura()
+                if alt_si <= alt_sd:
+                    _interna(arbol.si())
+                else:
+                    _interna(arbol.sd())
+        
+        _interna(nuevo_arbol)
+        return nuevo_arbol
+    
+    # ejercicio 15
+    def eliminar(self, dato: T) -> "ArbolBinario[T]":
+        # elimina toda la informacion del nodo, sus subarboles desaparecen
+        
+        if not self.pertenece(dato) or self.es_vacio():
+            raise ValueError("El valor no forma parte del arbol")
+        
+        nuevo_arbol = self.copy()
+
+        def _interna(arbol):
+            if not arbol.si().es_vacio() and arbol.si().raiz.dato == dato:
+                arbol.raiz.si = ArbolBinario()
+            elif not arbol.sd().es_vacio() and arbol.sd().raiz.dato == dato:
+                arbol.raiz.sd = ArbolBinario()
+            
+            else:
+                if not arbol.si().es_vacio():
+                    _interna(arbol.si())
+                if not arbol.sd().es_vacio():
+                    _interna(arbol.sd())
+
+        _interna(nuevo_arbol)
+        return nuevo_arbol
+
+    # ejercicio 18
+    def hermano(self, dato: T) -> T | None:
+        if not self.si().es_vacio() and self.si().raiz.dato == dato:
+            return self.sd().raiz.dato if not self.sd().es_vacio() else None
+        elif not self.sd().es_vacio() and self.sd().raiz.dato == dato:
+            return self.si().raiz.dato if not self.si().es_vacio() else None
+        else:
+            hermano_izq = None
+            hermano_der = None
+            if not self.si().es_vacio():
+                hermano_izq = self.si().hermano(dato)
+            if not self.sd().es_vacio():
+                hermano_der = self.sd().hermano(dato)
+            return hermano_izq if hermano_izq else hermano_der
     
 
 if __name__ == "__main__":
@@ -373,16 +454,22 @@ if __name__ == "__main__":
     print(f"7 pertenece al arbol?: {arbol.pertenece(7)}")
     print(f"altura: {arbol.altura()}")
     print(f"nivel de 4: {arbol.nivel(4)}")
-    print(f"padre de 6? : {arbol.padre(6)}") # anda mal
+    print(f"padre de 6? : {arbol.padre(6)}")
     print(f"hijos de 2: {arbol.hijos(2)}")
     print(f"antecesores de 10: {arbol.antecesores(10)}")
     #print(f"arbol sin hojas:\n{arbol.sinHojas()}")
     print(f"ramas: {arbol.ramas()}")
     print(f"balanceado? :  {arbol.balanceado()}")
     #print(f"espejo: \n{arbol.espejo()}")
-    print(f"preorder: {arbol.preorden()}")
-    print(f"preorder cola: {arbol.preorden_cola()}")
-    print(f"inorder: {arbol.inorden()}")
-    print(f"inorder cola: {arbol.inorden_cola()}")
-    print(f"posorder: {arbol.posorden()}")
+    # print(f"preorder: {arbol.preorden()}")
+    # print(f"preorder cola: {arbol.preorden_cola()}")
+    # print(f"inorder: {arbol.inorden()}")
+    # print(f"inorder cola: {arbol.inorden_cola()}")
+    # print(f"posorder: {arbol.posorden()}")
+    print(f"bfs: {arbol.bfs()}")
+    #print(f"arbol mas 11,12,13: \n{arbol.insertar(11).insertar(12).insertar(13)}")
+    #print(f"elimino el 4:\n{arbol.eliminar(4)}")
+    print(f"hermano de 7: {arbol.hermano(7)}")
+    
+
     
