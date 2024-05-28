@@ -112,6 +112,41 @@ class ArbolN(Generic[T]):
         else:
             direccion = recorrido.pop(0)
             return self.subarboles[direccion].recorrido_guiado(recorrido)
+        
+    def cantidad(self) -> int:
+        if self.es_hoja():
+            return 1
+        else:
+            return 1 + sum(subarbol.cantidad() for subarbol in self.subarboles)
+    
+    def altura(self) -> int:
+        if self.es_hoja():
+            return 1
+        else:
+            return 1 + max(sub.altura() for sub in self.subarboles)
+        
+    def __eq__(self, otro: object) -> bool:
+        return (isinstance(otro, ArbolN)
+                and otro.dato == self.dato
+                and all(otro_sub == self_sub for otro_sub, self_sub in zip(otro.subarboles, self.subarboles))) 
+
+    def pertenece(self, dato: T) -> bool:
+        return self.dato == dato or any(sub.pertenece(dato) for sub in self.subarboles) 
+
+    def nivel(self, dato: T) -> int:
+        def _interna(arbol, nivel = 1) -> int:
+            if arbol.dato == dato:
+                    return nivel
+            elif arbol.es_hoja():
+                return self.altura() + 1
+            else:
+                niveles = []
+                for sub in arbol.subarboles:
+                    niveles.append(_interna(sub, nivel+1))
+                return min(niveles)
+        return _interna(self)
+    
+    
 
 
 if __name__ == "__main__":
@@ -139,3 +174,6 @@ if __name__ == "__main__":
     print(arbol.postorden())
     print(arbol.bfs())
     print(arbol.recorrido_guiado([2,0]))
+    print(arbol.cantidad())
+    print(arbol.altura())
+    print(arbol.nivel())

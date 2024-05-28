@@ -422,6 +422,7 @@ class ArbolBinario(Generic[T]):
             if not self.sd().es_vacio():
                 hermano_der = self.sd().hermano(dato)
             return hermano_izq if hermano_izq else hermano_der
+        
     
 
 if __name__ == "__main__":
