@@ -146,8 +146,48 @@ class ArbolN(Generic[T]):
                 return min(niveles)
         return _interna(self)
     
-    
+import pydot
+import matplotlib.pyplot as plt
+from PIL import Image
+from io import BytesIO
+from typing import Any, TypeVar, Generic
 
+T = TypeVar('T')
+
+class Graficador(Generic[T]):
+    def __init__(self, arbol: ArbolN[T]):
+        self.arbol = arbol
+        self.dot = pydot.Dot(graph_type='graph')
+
+    def graficar(self) -> None:
+        self._agregar_nodos(self.arbol)
+        self._agregar_aristas(self.arbol)
+
+        # Renderiza el gráfico a un string PNG en memoria
+        png_data = self.dot.create_png()
+
+        # Mostrar el gráfico usando matplotlib
+        self._mostrar_png(png_data)
+
+    def _agregar_nodos(self, arbol: ArbolN[T], padre_id: str = "") -> None:
+        nodo_id = str(id(arbol))
+        self.dot.add_node(pydot.Node(nodo_id, label=str(arbol.dato)))
+        for subarbol in arbol.subarboles:
+            self._agregar_nodos(subarbol, nodo_id)
+
+    def _agregar_aristas(self, arbol: ArbolN[T], padre_id: str = "") -> None:
+        nodo_id = str(id(arbol))
+        if padre_id:
+            self.dot.add_edge(pydot.Edge(padre_id, nodo_id))
+        for subarbol in arbol.subarboles:
+            self._agregar_aristas(subarbol, nodo_id)
+
+    def _mostrar_png(self, png_data: bytes) -> None:
+        # Utiliza matplotlib para mostrar el gráfico PNG en una ventana
+        image = Image.open(BytesIO(png_data))
+        plt.imshow(image)
+        plt.axis('off')  # No mostrar los ejes
+        plt.show()
 
 if __name__ == "__main__":
     arbol = ArbolN(1)
@@ -169,11 +209,13 @@ if __name__ == "__main__":
     s4.insertar_subarbol(s8)
     s4.insertar_subarbol(s9)
 
+    graficador = Graficador(arbol)
+    graficador.graficar()
+
     print(arbol)
-    print(arbol.preorder())
-    print(arbol.postorden())
-    print(arbol.bfs())
-    print(arbol.recorrido_guiado([2,0]))
-    print(arbol.cantidad())
-    print(arbol.altura())
-    print(arbol.nivel())
+    # print(arbol.preorder())
+    # print(arbol.postorden())
+    # print(arbol.bfs())
+    # print(arbol.recorrido_guiado([2,0]))
+    # print(arbol.cantidad())
+    # print(arbol.altura())
